@@ -176,7 +176,7 @@ def purchase_success_event(event, context):
         domain = 'https://api.domain.com'
 
         res = requests.get(
-            f'{domain}/api/order/{ot_id}', headers=headers)
+            f'{domain}/api/{ot_id}', headers=headers)
         order_data = res.json()
 
         try:
