@@ -1,0 +1,64 @@
+exp_name: exp6
+# ----- Model -----
+# Use title, watch_times, zhTW, ja (with subtitle or not) as video embeds
+# Use user collected videos as features
+# Remove search keywords, location, and platform features
+# Fusion embedding through GRU
+# weighted loss in positive and negative samples
+# ----- Dataset -----
+# Dataset from datsabase (include Web, pro, and auto import)
+# Only recommend videos with language subtitle (not entire video corpus)
+
+resume: False               # Whether to resume training process
+log_iter: 20                 # How many iterations to record training log
+
+# Optimizer and dataloader
+optimizer: Adam             # Optimizer
+max_epoch: 40               # Number of maximum training epoch (1 epoch 13 mins)
+lr: 0.001                   # Learning rate
+batch_size: 128              # Batch size in training (Must larger than 1 because use batchNorm)
+test_size: 128               # Batch size in testing
+num_workers: 2              # Number of workers in load batch data
+step_size: [50]             # Number of step for optimizer's scheduler change lr
+gamma: 0.1                  # Changed lr = origin lr * gamma
+
+# Network
+model: YoutubeDeepRecSys    # Model
+input_size:
+    video: 515              # 512 (SBERT) + 3 (watch_times, zhTW, ja) = 515
+    candidate_cat: 1091     # 512 (videos) + 512 (collect) + 2 (example_age) + 1 (gender) + 64 (language)
+    ranking_cat: 713        # (256 + 256 + 64 + 3 + 64 + 64 + 3 + 3 = 713)
+corpus_size:
+    language: 4             # Content language (only change in pro)
+    level: 7                 # level
+    category: 19            # Youtube category
+    channel: 999            # Youtube channel
+in_channel: 2048            # First FC-layer
+output_size: 512            # Output FC-layer
+n_layer: 3                  # Number of Fc-layers
+embed_size: 512             # size of embedding layer (watch history and collect videos)
+weight_postive: 10
+weight_negative: 0.1
+fusion_gru: True
+
+# Data
+N_day: '2020-10-15'         # This day and after are recorded as label (Current day in inference)
+t_max: '2020-10-31'         # The maximum observed time in the training data (setting due to bigquery record error)
+num_watched_videos: 50
+num_positive_samples: 10
+num_negative_samples: 10000
+num_collect_videos: 20
+entire_corpus: False         # Recommend entire video corpus or videos with language subtitle
+
+# Training models
+train:
+    embed_model: True
+    candidate_model: True
+    ranking_model: False
+
+# Path and file
+last_day: '2020-08-10'
+data_root: ./deep_learn/dataset/
+train_file: train_list.txt
+val_file: val_list.txt
+test_file: test_list.txt
